@@ -58,15 +58,47 @@ extra indent = 2
   :group 'visual-line)
 (make-variable-buffer-local 'adaptive-wrap-extra-indent)
 
+(defcustom adaptive-wrap-extra-indent-char nil
+  "Fill character to use when `adaptive-wrap-extra-indent' is a
+positive value.  If set to `nil' the rightmost character of
+`fill-context-prefix' is used.
+
+Examples:
+
+fill char = .
+
+actual indent = 2
+extra indent = -1
+
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+ eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+ enim ad minim veniam, quis nostrud exercitation ullamco laboris
+ nisi ut aliquip ex ea commodo consequat.
+
+actual indent = 2
+extra indent = 2
+
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+  ..eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+  ..enim ad minim veniam, quis nostrud exercitation ullamco laboris
+  ..nisi ut aliquip ex ea commodo consequat."
+  :type 'character
+  :group 'visual-line)
+(make-variable-buffer-local 'adaptive-wrap-extra-indent)
+
 (defun adaptive-wrap-fill-context-prefix (beg en)
   "Like `fill-context-prefix', but with length adjusted by `adaptive-wrap-extra-indent'."
   ;; Note: fill-context-prefix may return nil; See:
   ;; http://article.gmane.org/gmane.emacs.devel/156285
   (let* ((fcp (or (fill-context-prefix beg en) ""))
          (fcp-len (string-width fcp))
-         (fill-char (if (< 0 fcp-len)
-                        (string-to-char (substring fcp -1))
-                      ?\ )))
+         (fill-char (or adaptive-wrap-extra-indent-char
+                        (if (< 0 fcp-len)
+                            (string-to-char (substring fcp -1))
+                          ?\ )
+                        )
+                    )
+         )
     (cond
      ((= 0 adaptive-wrap-extra-indent)
       fcp)
